@@ -1,0 +1,250 @@
+.quickadd-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2147483647;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.quickadd-chip {
+  pointer-events: auto;
+  background: linear-gradient(135deg, #4f46e5, #22d3ee);
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0 14px 32px rgba(79, 70, 229, 0.28);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.quickadd-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 42px rgba(34, 211, 238, 0.32);
+}
+
+.quickadd-card-container {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.quickadd-card {
+  width: 320px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #0f172a;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  padding: 18px 20px;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.quickadd-card--loading {
+  opacity: 0.6;
+}
+
+.quickadd-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quickadd-card-title {
+  font-size: 19px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.quickadd-card-subtitle {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.quickadd-card-time,
+.quickadd-card-location {
+  font-size: 13px;
+  margin-top: 6px;
+  color: #1e293b;
+}
+
+.quickadd-card-warning {
+  margin-top: 12px;
+  padding: 9px 12px;
+  background: rgba(250, 204, 21, 0.16);
+  border-radius: 10px;
+  font-size: 12px;
+  color: #b45309;
+}
+
+.quickadd-card-ambiguity {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quickadd-card-ambiguity-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quickadd-card-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.quickadd-card-edit label {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  gap: 6px;
+  color: #475569;
+  font-weight: 500;
+}
+
+.quickadd-card-edit input,
+.quickadd-card-edit textarea {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 9px 12px;
+  background: rgba(248, 250, 252, 0.9);
+  color: #0f172a;
+  font-size: 13px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.quickadd-card-edit input:focus,
+.quickadd-card-edit textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+.quickadd-card-edit textarea {
+  min-height: 68px;
+  resize: vertical;
+}
+
+.quickadd-card-actions {
+  margin-top: 20px;
+}
+
+.quickadd-card-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.quickadd-button {
+  pointer-events: auto;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(226, 232, 240, 0.65);
+  color: #0f172a;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.quickadd-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(99, 102, 241, 0.6);
+}
+
+.quickadd-button--primary {
+  background: linear-gradient(135deg, #6366f1, #22d3ee);
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 14px 36px rgba(99, 102, 241, 0.32);
+}
+
+.quickadd-button--ghost {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.18);
+  color: #4338ca;
+}
+
+.quickadd-button.is-active {
+  border-color: rgba(79, 70, 229, 0.8);
+  color: #4338ca;
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.quickadd-card-close {
+  pointer-events: auto;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 22px;
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.quickadd-card-close:hover {
+  color: #475569;
+}
+
+.quickadd-toast {
+  position: fixed;
+  bottom: 26px;
+  left: 26px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-size: 13px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.22);
+  pointer-events: auto;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.quickadd-toast--success {
+  background: rgba(16, 185, 129, 0.16);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.quickadd-toast--error {
+  background: rgba(248, 113, 113, 0.16);
+  color: #b91c1c;
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+.quickadd-toast--info {
+  background: rgba(59, 130, 246, 0.16);
+  color: #1d4ed8;
+  border-color: rgba(59, 130, 246, 0.28);
+}
+
+.quickadd-card-context {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #64748b;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.quickadd-card-context span:last-child {
+  color: #475569;
+  font-weight: 500;
+}
+

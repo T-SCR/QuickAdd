@@ -19,6 +19,15 @@ const App: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [historyCount, setHistoryCount] = useState<number | null>(null);
+  const [auth, setAuth] = useState<{
+    connected: boolean;
+    tokenExpiry?: number;
+    clientId: string;
+    redirectUri: string;
+    scopes: string[];
+    flow: 'native' | 'webauth' | null;
+  } | null>(null);
+  const [authBusy, setAuthBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +47,12 @@ const App: React.FC = () => {
       if (Array.isArray(history)) {
         setHistoryCount(history.length);
       }
+      try {
+        const resp = (await browser.runtime.sendMessage({ type: 'quickadd:auth-status' })) as any;
+        if (resp?.type === 'quickadd:auth-status:result') setAuth(resp.payload);
+      } catch (e) {
+        console.warn('Auth status check failed', e);
+      }
     })();
   }, []);
 
@@ -45,7 +60,7 @@ const App: React.FC = () => {
     return (
       <main style={{ padding: '32px', fontFamily: 'Segoe UI, sans-serif' }}>
         <h1>QuickAdd Settings</h1>
-        <p>Loading…</p>
+        <p>Loadingï¿½</p>
       </main>
     );
   }
@@ -85,6 +100,51 @@ const App: React.FC = () => {
     }
   };
 
+  const refreshAuth = async () => {
+    try {
+      const resp = (await browser.runtime.sendMessage({ type: 'quickadd:auth-status' })) as any;
+      if (resp?.type === 'quickadd:auth-status:result') setAuth(resp.payload);
+    } catch (e) {
+      console.warn('Auth status refresh failed', e);
+    }
+  };
+
+  const handleConnectGoogle = async () => {
+    setAuthBusy(true);
+    setStatus('Opening Google sign-inâ€¦');
+    try {
+      const resp = (await browser.runtime.sendMessage({ type: 'quickadd:auth-connect' })) as any;
+      if (resp?.type === 'quickadd:auth-ack' && resp.payload.ok) {
+        setStatus('Connected to Google.');
+      } else {
+        setStatus(`Google sign-in failed${resp?.payload?.error ? `: ${resp.payload.error}` : ''}`);
+      }
+    } catch (e: any) {
+      setStatus(`Google sign-in failed: ${e?.message ?? 'Unknown error'}`);
+    } finally {
+      setAuthBusy(false);
+      await refreshAuth();
+    }
+  };
+
+  const handleDisconnectGoogle = async () => {
+    setAuthBusy(true);
+    setStatus('Disconnecting Googleâ€¦');
+    try {
+      const resp = (await browser.runtime.sendMessage({ type: 'quickadd:auth-disconnect' })) as any;
+      if (resp?.type === 'quickadd:auth-ack' && resp.payload.ok) {
+        setStatus('Disconnected and tokens cleared.');
+      } else {
+        setStatus(`Disconnect failed${resp?.payload?.error ? `: ${resp.payload.error}` : ''}`);
+      }
+    } catch (e: any) {
+      setStatus(`Disconnect failed: ${e?.message ?? 'Unknown error'}`);
+    } finally {
+      setAuthBusy(false);
+      await refreshAuth();
+    }
+  };
+
   const handleReset = () => {
     const next = createDefaultSettings(tz);
     setSettings(next);
@@ -108,7 +168,7 @@ const App: React.FC = () => {
   };
 
   const handlePersistAI = async () => {
-    setStatus('Saving AI configuration…');
+    setStatus('Saving AI configurationï¿½');
     try {
       const response = await browser.runtime.sendMessage({
         type: 'quickadd:set-ai-config',
@@ -183,6 +243,33 @@ const App: React.FC = () => {
       </section>
 
       <section style={{ marginBottom: '32px' }}>
+        <h2 style={{ fontSize: '18px', marginBottom: '12px' }}>Google Account</h2>
+        <div style={{ display: 'grid', gap: '10px' }}>
+          <div style={{ fontSize: '14px', color: '#475569' }}>
+            Status: <strong>{auth?.connected ? 'Connected' : 'Not connected'}</strong>
+            {auth?.tokenExpiry ? ` â€¢ token expires ${new Date(auth.tokenExpiry).toLocaleString()}` : ''}
+          </div>
+          <div style={{ fontSize: '12px', color: '#64748b', wordBreak: 'break-all' }}>
+            Client ID: {auth?.clientId || 'â€”'}
+          </div>
+          <div style={{ fontSize: '12px', color: '#64748b', wordBreak: 'break-all' }}>
+            Redirect URI: {auth?.redirectUri || 'â€”'}
+          </div>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button type="button" disabled={authBusy} onClick={handleConnectGoogle} style={{ padding: '8px 16px' }}>
+              {authBusy ? 'Workingâ€¦' : (auth?.connected ? 'Reconnect Google' : 'Connect Google')}
+            </button>
+            <button type="button" disabled={authBusy || !auth?.connected} onClick={handleDisconnectGoogle} style={{ padding: '8px 16px' }}>
+              Disconnect / Clear tokens
+            </button>
+          </div>
+          <div style={{ fontSize: '12px', color: '#64748b' }}>
+            Tip: Add the Redirect URI above to your OAuth clientâ€™s Authorized redirect URIs and add the extension ID to Authorized Chrome apps.
+          </div>
+        </div>
+      </section>
+
+      <section style={{ marginBottom: '32px' }}>
         <h2 style={{ fontSize: '18px', marginBottom: '12px' }}>Controls</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -253,7 +340,7 @@ const App: React.FC = () => {
 
       <section style={{ marginBottom: '32px' }}>
         <h2 style={{ fontSize: '18px', marginBottom: '12px' }}>Data</h2>
-        <p style={{ color: '#475569' }}>Cached captures stored locally: {historyCount ?? '…'} items.</p>
+        <p style={{ color: '#475569' }}>Cached captures stored locally: {historyCount ?? 'ï¿½'} items.</p>
         <button type="button" onClick={handleClearHistory} style={{ padding: '8px 16px' }}>
           Erase cached capture history
         </button>
@@ -261,7 +348,7 @@ const App: React.FC = () => {
 
       <footer style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         <button type="button" onClick={handleSave} disabled={saving} style={{ padding: '10px 18px' }}>
-          {saving ? 'Saving…' : 'Save changes'}
+          {saving ? 'Savingï¿½' : 'Save changes'}
         </button>
         <button type="button" onClick={handleReset} style={{ padding: '10px 18px' }}>
           Reset to defaults

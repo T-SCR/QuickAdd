@@ -123,7 +123,8 @@ function fromLocalInput(value: string, tz: string): string | undefined {
   if (!value) return undefined;
   const dt = DateTime.fromFormat(value, "yyyy-MM-dd'T'HH:mm", { zone: DateTime.local().zoneName });
   if (!dt.isValid) return undefined;
-  return dt.setZone(tz).toISO();
+  const iso = dt.setZone(tz).toISO();
+  return iso ?? undefined;
 }
 
 function showToast(message: string, kind: ToastKind = 'info', timeout = 4000) {
@@ -612,18 +613,21 @@ document.addEventListener('mouseup', updateSelectionFromDocument, { capture: tru
 document.addEventListener('keyup', updateSelectionFromDocument, { capture: true });
 document.addEventListener('selectionchange', updateSelectionFromDocument);
 
-browser.runtime.onMessage.addListener((message) => {
-  if (!message || typeof message !== 'object') return undefined;
-  if (message.type === 'quickadd:command') {
+browser.runtime.onMessage.addListener((message: unknown) => {
+  if (!message || typeof message !== 'object' || message === null) return undefined;
+
+  if ('type' in message && message.type === 'quickadd:command' && 'payload' in message) {
     const envelope = message.payload as { mode: CommandMode };
     triggerParse(envelope.mode);
     return undefined;
   }
-  if (message.type === 'quickadd:toast') {
+
+  if ('type' in message && message.type === 'quickadd:toast' && 'payload' in message) {
     const payload = message.payload as { kind: ToastKind; message: string };
     showToast(payload.message, payload.kind);
     return undefined;
   }
+
   return undefined;
 });
 

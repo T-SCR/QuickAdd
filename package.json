@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
     "chrono-node": "^2.9.0",
     "luxon": "^3.7.2",
     "react": "^19.2.0",

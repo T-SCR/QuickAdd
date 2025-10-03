@@ -1,40 +1,11 @@
-import browser from 'webextension-polyfill';
 import { DateTime } from 'luxon';
 import type { EventCapture, TaskCapture, CreateResponse } from '../shared/types';
+import { getAccessToken, invalidateAccessToken } from './google-auth';
 
 const API_BASE = 'https://www.googleapis.com';
 
-async function acquireToken(interactive: boolean): Promise<string | undefined> {
-  try {
-    const token = await (browser.identity as any).getAuthToken({ interactive });
-    return token as string | undefined;
-  } catch (error) {
-    console.error('[QuickAdd] getAuthToken failed', error);
-    return undefined;
-  }
-}
-
-async function getAuthToken(): Promise<string> {
-  let token = await acquireToken(false);
-  if (!token) {
-    token = await acquireToken(true);
-  }
-  if (!token) {
-    throw new Error('Google authentication is required. Please sign in.');
-  }
-  return token;
-}
-
-async function invalidateToken(token: string) {
-  try {
-    await (browser.identity as any).removeCachedAuthToken({ token });
-  } catch (error) {
-    console.warn('[QuickAdd] removeCachedAuthToken failed', error);
-  }
-}
-
 async function googleFetch(input: RequestInfo | URL, init: RequestInit = {}, retry = true): Promise<Response> {
-  const token = await getAuthToken();
+  const token = await getAccessToken();
   const headers = new Headers(init.headers ?? {});
   headers.set('Authorization', `Bearer ${token}`);
   if (!headers.has('Content-Type')) {
@@ -43,7 +14,7 @@ async function googleFetch(input: RequestInfo | URL, init: RequestInit = {}, ret
 
   const response = await fetch(input, { ...init, headers });
   if (response.status === 401 && retry) {
-    await invalidateToken(token);
+    await invalidateAccessToken(token);
     return googleFetch(input, init, false);
   }
   return response;

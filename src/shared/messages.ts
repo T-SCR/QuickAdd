@@ -15,6 +15,9 @@ export type BackgroundRequest =
   | { type: 'quickadd:save-settings'; payload: QuickAddSettings }
   | { type: 'quickadd:set-ai-config'; payload: { enabled: boolean; provider: 'gemini' | 'huggingface' | 'local'; apiKey?: string } }
   | { type: 'quickadd:clear-history' }
+  | { type: 'quickadd:auth-status' }
+  | { type: 'quickadd:auth-connect' }
+  | { type: 'quickadd:auth-disconnect' }
   | { type: 'quickadd:log'; payload: { level?: 'debug' | 'info' | 'warn' | 'error'; message: string; meta?: Record<string, unknown> } };
 
 export type BackgroundResponse =
@@ -22,6 +25,8 @@ export type BackgroundResponse =
   | { type: 'quickadd:create:result'; payload: CreateResponse }
   | { type: 'quickadd:get-settings:result'; payload: QuickAddSettings }
   | { type: 'quickadd:clear-history:result'; payload: { removed: number } }
+  | { type: 'quickadd:auth-status:result'; payload: { connected: boolean; tokenExpiry?: number; clientId: string; redirectUri: string; scopes: string[]; flow: 'native' | 'webauth' | null } }
+  | { type: 'quickadd:auth-ack'; payload: { ok: boolean; error?: string } }
   | { type: 'quickadd:ack' };
 
 export type ContentMessage =

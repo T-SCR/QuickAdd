@@ -7,6 +7,7 @@ import { createDefaultSettings, HISTORY_KEY, SETTINGS_KEY } from '../shared/sett
 import type { BackgroundRequest, BackgroundResponse } from '../shared/messages';
 import { enhanceWithAI } from '../shared/ai-parser';
 import { createGoogleCalendarEvent, createGoogleTask } from './google';
+import { connectInteractive, disconnectGoogle, getAuthStatus, resetStoredToken } from './google-auth';
 import type { Capture, CreatePayload, CreateResponse, ParsePayload, QuickAddSettings } from '../shared/types';
 
 const HISTORY_LIMIT = 200;
@@ -290,6 +291,30 @@ browser.runtime.onMessage.addListener((message: unknown, sender: Runtime.Message
     }
     case 'quickadd:clear-history':
       return handleClearHistory();
+    case 'quickadd:auth-status':
+      return (async () => {
+        const status = await getAuthStatus();
+        return { type: 'quickadd:auth-status:result', payload: status } as const;
+      })();
+    case 'quickadd:auth-connect':
+      return (async () => {
+        try {
+          const ok = await connectInteractive();
+          return { type: 'quickadd:auth-ack', payload: { ok } } as const;
+        } catch (e: any) {
+          return { type: 'quickadd:auth-ack', payload: { ok: false, error: e?.message ?? 'Auth failed' } } as const;
+        }
+      })();
+    case 'quickadd:auth-disconnect':
+      return (async () => {
+        try {
+          await disconnectGoogle();
+          await resetStoredToken();
+          return { type: 'quickadd:auth-ack', payload: { ok: true } } as const;
+        } catch (e: any) {
+          return { type: 'quickadd:auth-ack', payload: { ok: false, error: e?.message ?? 'Disconnect failed' } } as const;
+        }
+      })();
     case 'quickadd:log':
       if (request.payload.level === 'error') {
         console.error('[QuickAdd]', request.payload.message, request.payload.meta ?? {});

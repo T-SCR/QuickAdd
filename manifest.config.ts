@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { defineManifest } from '@crxjs/vite-plugin';
 
-const googleClientId = process.env.GOOGLE_CLIENT_ID ?? 'ENTER_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+const googleClientId =
+  process.env.GOOGLE_CLIENT_ID ?? '997585536895-gn5a8o3s8ssck3e3ifn9spd3l7dqcgl7.apps.googleusercontent.com';
 const oauthScopes = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/tasks'
